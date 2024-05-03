@@ -6,6 +6,8 @@ var logger = require('morgan');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
+const passport = require('passport');
+const authenticate = require('./authenticate');
 
 
 //import
@@ -45,28 +47,45 @@ app.use(session({
   store: new FileStore()
 }));
 
+//session based authentication - checking incoming request if there's an existing session for client. if so, the session data for that client is loaded into a request as req.user
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 
 //authentication and session after adding Router endpoints on user
 function auth(req, res, next) {
-  console.log(req.session);
+  console.log(req.user);
 
-  if (!req.session.user) {
+  if (!req.user) {
     const err = new Error('You are not authenticated!');
     err.status = 401;
     return next(err);
   } else {
-    if (req.session.user === 'authenticated') {
-        return next();
-    } else {
-        const err = new Error('You are not authenticated!');
-        err.status = 401;
-        return next(err);
-    }
+    return next(); // pass the client to the next middleware
   }
 }
+
+// //authentication and session after adding Router endpoints on user
+// function auth(req, res, next) {
+//   console.log(req.session);
+
+//   if (!req.session.user) {
+//     const err = new Error('You are not authenticated!');
+//     err.status = 401;
+//     return next(err);
+//   } else {
+//     if (req.session.user === 'authenticated') {
+//         return next();
+//     } else {
+//         const err = new Error('You are not authenticated!');
+//         err.status = 401;
+//         return next(err);
+//     }
+//   }
+// }
 
 // //authentication and session
 // function auth(req, res, next) {
