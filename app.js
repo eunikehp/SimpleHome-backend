@@ -3,9 +3,25 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const mongoose = require('mongoose');
 
+
+//import
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+const productRouter = require('./routes/productRouter');
+
+//connect to mongodb
+const url = 'mongodb://localhost:27017/simplehome';
+const connect = mongoose.connect(url, {
+  useCreateIndex: true,
+  useFindAndModify: false,
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+connect.then(() => console.log('Connected correctly to server'),
+  err => console.log(err)
+);
 
 var app = express();
 
@@ -21,6 +37,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/products', productRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
